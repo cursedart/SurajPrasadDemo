@@ -48,15 +48,17 @@ final class PortfolioViewModel: PortfolioViewModelProtocol, ObservableObject {
 
     // MARK: - API Call
     
-    private func resetState() {
-        self.holdings = []
-        self.portfolioSummary = nil
+    private func resetState(clearData: Bool) {
+        if clearData {
+            self.holdings = []
+            self.portfolioSummary = nil
+        }
         self.isLoading = true
         self.errorMessage = nil
     }
 
-    func fetchHoldings() {
-        self.resetState()
+    func fetchHoldings(isRefreshing: Bool = false) {
+        self.resetState(clearData: !isRefreshing)
 
         self.repository.fetchHoldings()
             .receive(on: DispatchQueue.main)

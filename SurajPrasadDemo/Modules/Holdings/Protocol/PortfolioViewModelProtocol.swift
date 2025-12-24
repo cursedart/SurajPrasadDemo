@@ -27,5 +27,5 @@ protocol PortfolioViewModelProtocol: AnyObject {
 
     // MARK: - Actions
     
-    func fetchHoldings()
+    func fetchHoldings(isRefreshing: Bool)
 }

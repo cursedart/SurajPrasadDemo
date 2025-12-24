@@ -87,7 +87,7 @@ final class PortfolioViewC: UIViewController {
         self.tableView.contentInset.bottom = 240
         self.tableView.verticalScrollIndicatorInsets.bottom = 240
         
-        self.viewModel.fetchHoldings()
+        self.viewModel.fetchHoldings(isRefreshing: false)
         self.bindingsSetup()
     }
     
@@ -120,18 +120,41 @@ final class PortfolioViewC: UIViewController {
     }
     
     @objc private func handleRefresh() {
-        self.viewModel.fetchHoldings()
+        self.viewModel.fetchHoldings(isRefreshing: false)
     }
     
     private func bindingsSetup() {
         self.bindViewToViewModel()
         self.bindViewModelToView()
     }
+    
+    private func showLoadingState() {
+        var config = UIContentUnavailableConfiguration.loading()
+        config.text = "Loading Portfolio..."
+        self.contentUnavailableConfiguration = config
+    }
+
+    private func hideLoadingState() {
+        self.contentUnavailableConfiguration = nil
+    }
 
     private func bindViewToViewModel() {
     }
 
     private func bindViewModelToView() {
+
+        self.viewModel.loadingPublisher
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] isLoading in
+                guard let self else { return }
+
+                if isLoading {
+                    self.showLoadingState()
+                } else {
+                    self.hideLoadingState()
+                }
+            }
+            .store(in: &self.cancellables)
 
         Publishers.CombineLatest(self.viewModel.holdingsPublisher,
                                  self.viewModel.portfolioSummaryPublisher)
