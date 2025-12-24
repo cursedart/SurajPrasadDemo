@@ -72,7 +72,7 @@ final class HoldingTVC: UITableViewCell {
     override init(style: UITableViewCell.CellStyle,
                   reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
-        initialSetup()
+        self.initialSetup()
     }
 
     required init?(coder: NSCoder) {
@@ -144,9 +144,21 @@ final class HoldingTVC: UITableViewCell {
 
     func configure(with holding: Holding) {
         self.symbolLabel.text = holding.symbol
-        self.ltpLabel.text = "LTP: \(holding.safeLTP.asCurrency())"
-        self.netQtyLabel.text = "NET QTY: \(holding.safeQuantity)"
-        self.pnlLabel.text = "P&L: \(holding.profitOrLoss.asCurrency())"
-        self.pnlLabel.textColor = holding.isProfit ? .systemGreen : .systemRed
+        
+        self.ltpLabel.attributedText = .labelValue(
+            title: "LTP",
+            value: "\(holding.safeLTP.asCurrency())"
+        )
+        
+        self.netQtyLabel.attributedText = .labelValue(
+            title: "NET QTY",
+            value: "\(holding.safeQuantity)"
+        )
+        
+        self.pnlLabel.attributedText = .labelValue(
+            title: "P&L",
+            value: holding.profitOrLoss.asCurrency(),
+            valueColor: holding.isProfit ? .systemGreen : .systemRed
+        )
     }
 }

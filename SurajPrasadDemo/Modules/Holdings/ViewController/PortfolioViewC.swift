@@ -27,6 +27,10 @@ final class PortfolioViewC: UIViewController {
     private let summaryView = PortfolioSummaryDropdownView()
     private let refreshControl = UIRefreshControl()
 
+    private let collapsedInset: CGFloat = 80
+    private let expandedInset: CGFloat = 210
+    private var isSummaryExpanded: Bool = false
+
     // MARK: - View Life Cycle Functions
     
     override func viewDidLoad() {
@@ -84,21 +88,22 @@ final class PortfolioViewC: UIViewController {
         self.setupTableView()
         self.setupBottomView()
         self.summaryView.isHidden = true
-        
-        self.tableView.contentInset.bottom = 240
-        self.tableView.verticalScrollIndicatorInsets.bottom = 240
-        
+
+        self.updateTableInsets(isExpanded: false)
+
         self.viewModel.fetchHoldings(isRefreshing: false)
         self.bindingsSetup()
     }
     
     private func setupBottomView() {
-        self.view.addSubview(summaryView)
+        self.view.addSubview(self.summaryView)
+        
+        self.summaryView.delegate = self
 
         NSLayoutConstraint.activate([
-            summaryView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 8),
-            summaryView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -8),
-            summaryView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -8)
+            self.summaryView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 8),
+            self.summaryView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -8),
+            self.summaryView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -8)
         ])
     }
 
@@ -188,6 +193,27 @@ final class PortfolioViewC: UIViewController {
             isTotalProfit: summary.overallProfitOrLoss >= 0
         )
     }
+    
+    private func updateTableInsets(isExpanded: Bool, animated: Bool = true) {
+        let bottomInset = isExpanded ? expandedInset : collapsedInset
+
+        let updates = {
+            self.tableView.contentInset.bottom = bottomInset
+            self.tableView.verticalScrollIndicatorInsets.bottom = bottomInset
+        }
+
+        if animated {
+            UIView.animate(withDuration: 0.25, animations: updates)
+        } else {
+            updates()
+        }
+    }
+
+    func setSummaryExpanded(_ expanded: Bool) {
+        guard expanded != isSummaryExpanded else { return }
+        isSummaryExpanded = expanded
+        updateTableInsets(isExpanded: expanded)
+    }
 }
 
 // MARK: UITableViewDataSource
@@ -218,5 +244,13 @@ extension PortfolioViewC: UITableViewDelegate {
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         return 92.0
+    }
+}
+
+// MARK: - PortfolioSummaryExpandableDelegate
+
+extension PortfolioViewC: PortfolioSummaryExpandableDelegate {
+    func summaryViewDidChangeExpansion(isExpanded: Bool) {
+        self.updateTableInsets(isExpanded: isExpanded)
     }
 }

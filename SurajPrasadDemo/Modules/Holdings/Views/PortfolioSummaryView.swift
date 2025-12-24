@@ -8,6 +8,10 @@
 import Foundation
 import UIKit
 
+protocol PortfolioSummaryExpandableDelegate: AnyObject {
+    func summaryViewDidChangeExpansion(isExpanded: Bool)
+}
+
 final class PortfolioSummaryDropdownView: UIView {
 
     // MARK: - State
@@ -21,6 +25,8 @@ final class PortfolioSummaryDropdownView: UIView {
     private let currentValueLabel = UILabel()
     private let totalInvestmentLabel = UILabel()
     private let todaysPNLLabel = UILabel()
+    
+    weak var delegate: PortfolioSummaryExpandableDelegate?
 
     // MARK: - UI Components
 
@@ -185,6 +191,7 @@ final class PortfolioSummaryDropdownView: UIView {
 
     @objc private func toggle() {
         self.isExpanded.toggle()
+        self.delegate?.summaryViewDidChangeExpansion(isExpanded: isExpanded)
         self.isUserInteractionEnabled = false
 
         if self.isExpanded {
