@@ -83,6 +83,7 @@ final class PortfolioViewC: UIViewController {
 
         self.setupTableView()
         self.setupBottomView()
+        self.summaryView.isHidden = true
         
         self.tableView.contentInset.bottom = 240
         self.tableView.verticalScrollIndicatorInsets.bottom = 240
@@ -149,8 +150,10 @@ final class PortfolioViewC: UIViewController {
                 guard let self else { return }
 
                 if isLoading {
+                    self.summaryView.isHidden = true
                     self.showLoadingState()
                 } else {
+                    self.summaryView.isHidden = false
                     self.hideLoadingState()
                 }
             }
@@ -164,6 +167,7 @@ final class PortfolioViewC: UIViewController {
             guard let summary else { return }
 
             self.updateSummaryView(with: summary)
+            self.summaryView.isHidden = false
             self.tableView.reloadData()
 
             // Stop refresh animation
