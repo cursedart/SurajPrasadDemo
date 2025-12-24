@@ -17,9 +17,13 @@ final class PortfolioSummaryDropdownView: UIView {
     private let expandedHeight: CGFloat = 180
 
     private var heightConstraint: NSLayoutConstraint!
-
-    // MARK: - Expandable Content Stack
     
+    private let currentValueLabel = UILabel()
+    private let totalInvestmentLabel = UILabel()
+    private let todaysPNLLabel = UILabel()
+
+    // MARK: - UI Components
+
     private let contentStack: UIStackView = {
         let stack = UIStackView()
         stack.axis = .vertical
@@ -30,7 +34,6 @@ final class PortfolioSummaryDropdownView: UIView {
         return stack
     }()
 
-    // MARK: - Toggle Row (Always Visible)
     private let toggleRow: UIStackView = {
         let stack = UIStackView()
         stack.axis = .horizontal
@@ -41,90 +44,99 @@ final class PortfolioSummaryDropdownView: UIView {
     }()
 
     private let toggleTitleLabel: UILabel = {
-        let l = UILabel()
-        l.text = "Profit & Loss*"
-        l.font = .systemFont(ofSize: 14)
-        l.textColor = .darkGray
-        return l
+        let label = UILabel()
+        label.text = "Profit & Loss*"
+        label.font = .systemFont(ofSize: 14)
+        label.textColor = .darkGray
+        return label
     }()
 
     private let toggleValueLabel: UILabel = {
-        let l = UILabel()
-        l.text = "-₹697.06 (2.44%)"
-        l.font = .systemFont(ofSize: 14, weight: .semibold)
-        l.textAlignment = .right
-        return l
+        let label = UILabel()
+        label.font = .systemFont(ofSize: 14, weight: .semibold)
+        label.textAlignment = .right
+        return label
     }()
 
     private let toggleArrow: UIImageView = {
-        let iv = UIImageView(image: UIImage(systemName: "chevron.down"))
-        iv.tintColor = .darkGray
-        iv.translatesAutoresizingMaskIntoConstraints = false
-        return iv
+        let imageView = UIImageView(image: UIImage(systemName: "chevron.down"))
+        imageView.tintColor = .darkGray
+        imageView.translatesAutoresizingMaskIntoConstraints = false
+        return imageView
     }()
 
     // MARK: - Init
-    
+
     override init(frame: CGRect) {
         super.init(frame: frame)
-        
-        setupUI()
-        setupGesture()
+        self.initialSetup()
+        self.setupGesture()
     }
 
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
 
-    // MARK: - UI Setup
-    private func setupUI() {
-        backgroundColor = .white
-        layer.cornerRadius = 14
-        layer.borderWidth = 1
-        layer.borderColor = UIColor(white: 0.9, alpha: 1).cgColor
-        translatesAutoresizingMaskIntoConstraints = false
-        
-        buildRows()
-        
-        toggleArrow.widthAnchor.constraint(equalToConstant: 14).isActive = true
+    // MARK: - Private Method
 
-        toggleRow.addArrangedSubview(toggleTitleLabel)
-        toggleRow.addArrangedSubview(toggleArrow)
-        toggleRow.addArrangedSubview(UIView())
-        toggleRow.addArrangedSubview(toggleValueLabel)
+    private func initialSetup() {
+        self.setupAppearance()
+        self.setupHierarchy()
+        self.setupConstraints()
+        self.buildRows()
+    }
 
-        addSubview(contentStack)
-        addSubview(toggleRow)
+    private func setupAppearance() {
+        self.backgroundColor = .white
+        self.layer.cornerRadius = 14
+        self.layer.borderWidth = 1
+        self.layer.borderColor = UIColor(white: 0.9, alpha: 1).cgColor
+        self.translatesAutoresizingMaskIntoConstraints = false
+    }
 
-        heightConstraint = heightAnchor.constraint(equalToConstant: collapsedHeight)
-        heightConstraint.isActive = true
+    private func setupHierarchy() {
+        self.toggleArrow.widthAnchor.constraint(equalToConstant: 14).isActive = true
+
+        self.toggleRow.addArrangedSubview(self.toggleTitleLabel)
+        self.toggleRow.addArrangedSubview(self.toggleArrow)
+        self.toggleRow.addArrangedSubview(UIView())
+        self.toggleRow.addArrangedSubview(self.toggleValueLabel)
+
+        self.addSubview(self.contentStack)
+        self.addSubview(self.toggleRow)
+    }
+
+    private func setupConstraints() {
+        self.heightConstraint = self.heightAnchor.constraint(equalToConstant: self.collapsedHeight)
+        self.heightConstraint.isActive = true
 
         NSLayoutConstraint.activate([
-            contentStack.topAnchor.constraint(equalTo: topAnchor, constant: 16),
-            contentStack.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 16),
-            contentStack.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -16),
+            self.contentStack.topAnchor.constraint(equalTo: self.topAnchor, constant: 16),
+            self.contentStack.leadingAnchor.constraint(equalTo: self.leadingAnchor, constant: 16),
+            self.contentStack.trailingAnchor.constraint(equalTo: self.trailingAnchor, constant: -16),
 
-            toggleRow.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 16),
-            toggleRow.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -16),
-            toggleRow.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -14)
+            self.toggleRow.leadingAnchor.constraint(equalTo: self.leadingAnchor, constant: 16),
+            self.toggleRow.trailingAnchor.constraint(equalTo: self.trailingAnchor, constant: -16),
+            self.toggleRow.bottomAnchor.constraint(equalTo: self.bottomAnchor, constant: -14)
         ])
     }
 
     // MARK: - Build Rows
-    private func buildRows() {
-        clearStackView(contentStack)
 
-        addRow(title: "Current value*", value: "₹ 27,893.65")
-        addRow(title: "Total investment*", value: "₹ 28,590.71")
-        addRow(title: "Today’s Profit & Loss*", value: "-₹235.65", isProfit: false)
+    private func buildRows() {
+        self.clearStackView(self.contentStack)
+
+        self.addRow(title: "Current value*", valueLabel: self.currentValueLabel)
+        self.addRow(title: "Total investment*", valueLabel: self.totalInvestmentLabel)
+        self.addRow(title: "Today’s Profit & Loss*", valueLabel: self.todaysPNLLabel, isProfit: false)
 
         let divider = UIView()
         divider.backgroundColor = UIColor(white: 0.9, alpha: 1)
         divider.heightAnchor.constraint(equalToConstant: 1).isActive = true
-        contentStack.addArrangedSubview(divider)
+
+        self.contentStack.addArrangedSubview(divider)
     }
 
-    // MARK: - Stack Cleanup (CRITICAL FIX)
     private func clearStackView(_ stack: UIStackView) {
         stack.arrangedSubviews.forEach {
             stack.removeArrangedSubview($0)
@@ -132,51 +144,58 @@ final class PortfolioSummaryDropdownView: UIView {
         }
     }
 
-    // MARK: - Row Builder
-    
-    private func addRow(title: String, value: String, isProfit: Bool = true) {
-        let left = UILabel()
-        left.text = title
-        left.font = .systemFont(ofSize: 14)
-        left.textColor = .darkGray
+    private func addRow(title: String, valueLabel: UILabel, isProfit: Bool = true) {
+        let leftLabel = UILabel()
+        leftLabel.text = title
+        leftLabel.font = .systemFont(ofSize: 14)
+        leftLabel.textColor = .darkGray
 
-        let right = UILabel()
-        right.text = value
-        right.font = .systemFont(ofSize: 14, weight: .semibold)
-        right.textAlignment = .right
-        right.textColor = isProfit ? .label : .systemRed
+        valueLabel.font = .systemFont(ofSize: 14, weight: .semibold)
+        valueLabel.textAlignment = .right
+        valueLabel.textColor = isProfit ? .label : .systemRed
 
-        let row = UIStackView(arrangedSubviews: [left, right])
+        let row = UIStackView(arrangedSubviews: [leftLabel, valueLabel])
         row.axis = .horizontal
         row.distribution = .equalSpacing
 
-        contentStack.addArrangedSubview(row)
+        self.contentStack.addArrangedSubview(row)
     }
 
-    // MARK: - Gesture
-    
     private func setupGesture() {
-        let tap = UITapGestureRecognizer(target: self, action: #selector(toggle))
-        addGestureRecognizer(tap)
+        let tap = UITapGestureRecognizer(target: self, action: #selector(self.toggle))
+        self.addGestureRecognizer(tap)
+    }
+    
+    // MARK: Internal Method
+    
+    func updateSummary(currentValue: String, totalInvestment: String, todaysPNL: String, isTodayProfit: Bool, totalPNL: String, isTotalProfit: Bool) {
+        self.currentValueLabel.text = currentValue
+        self.totalInvestmentLabel.text = totalInvestment
+
+        self.todaysPNLLabel.text = todaysPNL
+        self.todaysPNLLabel.textColor = isTodayProfit ? .systemGreen : .systemRed
+
+        self.toggleValueLabel.text = totalPNL
+        self.toggleValueLabel.textColor = isTotalProfit ? .systemGreen : .systemRed
     }
 
     // MARK: - Expand / Collapse
-    
+
     @objc private func toggle() {
-        isExpanded.toggle()
-        isUserInteractionEnabled = false
+        self.isExpanded.toggle()
+        self.isUserInteractionEnabled = false
 
-        if isExpanded {
-            // EXPAND
-            contentStack.isHidden = false
-            contentStack.alpha = 0
-            contentStack.transform = CGAffineTransform(translationX: 0, y: -8)
+        if self.isExpanded {
+            self.contentStack.isHidden = false
+            self.contentStack.alpha = 0
+            self.contentStack.transform = CGAffineTransform(translationX: 0, y: -8)
+            self.heightConstraint.constant = self.expandedHeight
 
-            heightConstraint.constant = expandedHeight
-
-            UIView.animate(withDuration: 0.32,
-                           delay: 0,
-                           options: [.curveEaseOut]) {
+            UIView.animate(
+                withDuration: 0.32,
+                delay: 0,
+                options: [.curveEaseOut]
+            ) {
                 self.contentStack.alpha = 1
                 self.contentStack.transform = .identity
                 self.toggleArrow.transform = CGAffineTransform(rotationAngle: .pi)
@@ -186,10 +205,11 @@ final class PortfolioSummaryDropdownView: UIView {
             }
 
         } else {
-            // COLLAPSE
-            UIView.animate(withDuration: 0.22,
-                           delay: 0,
-                           options: [.curveEaseIn]) {
+            UIView.animate(
+                withDuration: 0.22,
+                delay: 0,
+                options: [.curveEaseIn]
+            ) {
                 self.contentStack.alpha = 0
                 self.contentStack.transform = CGAffineTransform(translationX: 0, y: -6)
                 self.toggleArrow.transform = .identity
@@ -197,9 +217,7 @@ final class PortfolioSummaryDropdownView: UIView {
                 self.contentStack.isHidden = true
                 self.heightConstraint.constant = self.collapsedHeight
 
-                UIView.animate(withDuration: 0.22,
-                               delay: 0,
-                               options: [.curveEaseOut]) {
+                UIView.animate(withDuration: 0.22, delay: 0, options: [.curveEaseOut]) {
                     self.superview?.layoutIfNeeded()
                 } completion: { _ in
                     self.isUserInteractionEnabled = true

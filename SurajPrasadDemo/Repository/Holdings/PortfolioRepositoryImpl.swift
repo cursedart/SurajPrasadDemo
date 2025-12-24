@@ -17,7 +17,6 @@ final class PortfolioRepositoryImpl: PortfolioRepository {
     }
 
     func fetchHoldings() -> AnyPublisher<PortfolioResponse, Error> {
-        networkService.getData(endpoint: .portfolio, type: PortfolioResponse.self
-        )
+        self.networkService.getData(endpoint: .portfolio, type: PortfolioResponse.self)
     }
 }

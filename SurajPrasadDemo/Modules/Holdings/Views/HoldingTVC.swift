@@ -9,103 +9,144 @@ import UIKit
 
 final class HoldingTVC: UITableViewCell {
 
+    // MARK: - Identifier
+    
     static let identifier = "HoldingTVC"
 
-    private let symbolLabel = UILabel()
-    private let tagLabel = UILabel()
-    private let ltpLabel = UILabel()
-    private let netQtyLabel = UILabel()
-    private let pnlLabel = UILabel()
-    private let separator = UIView()
+    // MARK: - UI Components
+
+    private let symbolLabel: UILabel = {
+        let label = UILabel()
+        label.font = .boldSystemFont(ofSize: 16)
+        label.textColor = .black
+        label.translatesAutoresizingMaskIntoConstraints = false
+        return label
+    }()
+
+    private let tagLabel: UILabel = {
+        let label = UILabel()
+        label.font = .systemFont(ofSize: 11)
+        label.textColor = .darkGray
+        label.backgroundColor = UIColor(white: 0.9, alpha: 1)
+        label.layer.cornerRadius = 4
+        label.clipsToBounds = true
+        label.textAlignment = .center
+        label.translatesAutoresizingMaskIntoConstraints = false
+        label.isHidden = true
+        return label
+    }()
+
+    private let ltpLabel: UILabel = {
+        let label = UILabel()
+        label.font = .systemFont(ofSize: 14)
+        label.textAlignment = .right
+        label.translatesAutoresizingMaskIntoConstraints = false
+        return label
+    }()
+
+    private let netQtyLabel: UILabel = {
+        let label = UILabel()
+        label.font = .systemFont(ofSize: 13)
+        label.textColor = .gray
+        label.translatesAutoresizingMaskIntoConstraints = false
+        return label
+    }()
+
+    private let pnlLabel: UILabel = {
+        let label = UILabel()
+        label.font = .boldSystemFont(ofSize: 14)
+        label.textAlignment = .right
+        label.translatesAutoresizingMaskIntoConstraints = false
+        return label
+    }()
+
+    private let separatorView: UIView = {
+        let view = UIView()
+        view.backgroundColor = UIColor(white: 0.9, alpha: 1)
+        view.translatesAutoresizingMaskIntoConstraints = false
+        return view
+    }()
+
+    // MARK: - Init
 
     override init(style: UITableViewCell.CellStyle,
                   reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
-        setupUI()
-    }
-    
-    override func awakeFromNib() {
-        super.awakeFromNib()
-        // Initialization code
-    }
-
-    override func setSelected(_ selected: Bool, animated: Bool) {
-        super.setSelected(selected, animated: animated)
-
-        // Configure the view for the selected state
+        initialSetup()
     }
 
     required init?(coder: NSCoder) {
-        fatalError()
+        fatalError("init(coder:) has not been implemented")
+    }
+    
+    override func prepareForReuse() {
+        super.prepareForReuse()
+        
+        self.symbolLabel.text = ""
+        self.ltpLabel.text = ""
+        self.netQtyLabel.text = ""
+        self.pnlLabel.text = ""
+        self.pnlLabel.textColor = .white
     }
 
-    private func setupUI() {
-        selectionStyle = .none
+    // MARK: - Private methods
 
-        symbolLabel.font = .boldSystemFont(ofSize: 16)
-        symbolLabel.textColor = .black
+    private func initialSetup() {
+        self.selectionStyle = .none
+        
+        self.addSubviews()
+        self.setupConstraints()
+    }
 
-        tagLabel.font = .systemFont(ofSize: 11)
-        tagLabel.textColor = .darkGray
-        tagLabel.backgroundColor = UIColor(white: 0.9, alpha: 1)
-        tagLabel.layer.cornerRadius = 4
-        tagLabel.clipsToBounds = true
-        tagLabel.textAlignment = .center
+    private func addSubviews() {
+        self.contentView.addSubview(self.symbolLabel)
+        self.contentView.addSubview(self.tagLabel)
+        self.contentView.addSubview(self.ltpLabel)
+        self.contentView.addSubview(self.netQtyLabel)
+        self.contentView.addSubview(self.pnlLabel)
+        self.contentView.addSubview(self.separatorView)
+    }
 
-        ltpLabel.font = .systemFont(ofSize: 14)
-        ltpLabel.textAlignment = .right
-
-        netQtyLabel.font = .systemFont(ofSize: 13)
-        netQtyLabel.textColor = .gray
-
-        pnlLabel.font = .boldSystemFont(ofSize: 14)
-        pnlLabel.textAlignment = .right
-
-        separator.backgroundColor = UIColor(white: 0.9, alpha: 1)
-
-        [symbolLabel, tagLabel, ltpLabel, netQtyLabel, pnlLabel, separator]
-            .forEach {
-                $0.translatesAutoresizingMaskIntoConstraints = false
-                contentView.addSubview($0)
-            }
-
+    private func setupConstraints() {
         NSLayoutConstraint.activate([
-            symbolLabel.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 14),
-            symbolLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
 
-            tagLabel.leadingAnchor.constraint(equalTo: symbolLabel.trailingAnchor, constant: 8),
-            tagLabel.centerYAnchor.constraint(equalTo: symbolLabel.centerYAnchor),
-            tagLabel.widthAnchor.constraint(equalToConstant: 80),
-            tagLabel.heightAnchor.constraint(equalToConstant: 18),
+            // Symbol
+            self.symbolLabel.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 14),
+            self.symbolLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
 
-            ltpLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
-            ltpLabel.centerYAnchor.constraint(equalTo: symbolLabel.centerYAnchor),
+            // Tag
+            self.tagLabel.leadingAnchor.constraint(equalTo: symbolLabel.trailingAnchor, constant: 8),
+            self.tagLabel.centerYAnchor.constraint(equalTo: symbolLabel.centerYAnchor),
+            self.tagLabel.widthAnchor.constraint(equalToConstant: 80),
+            self.tagLabel.heightAnchor.constraint(equalToConstant: 18),
 
-            netQtyLabel.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -16),
-            netQtyLabel.leadingAnchor.constraint(equalTo: symbolLabel.leadingAnchor),
-
-            pnlLabel.trailingAnchor.constraint(equalTo: ltpLabel.trailingAnchor),
-            pnlLabel.centerYAnchor.constraint(equalTo: netQtyLabel.centerYAnchor),
-
-            separator.bottomAnchor.constraint(equalTo: contentView.bottomAnchor),
-            separator.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
-            separator.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
-            separator.heightAnchor.constraint(equalToConstant: 1)
+            // LTP
+            self.ltpLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
+            self.ltpLabel.centerYAnchor.constraint(equalTo: symbolLabel.centerYAnchor),
+            
+            // Net Qty
+            self.netQtyLabel.leadingAnchor.constraint(equalTo: symbolLabel.leadingAnchor),
+            self.netQtyLabel.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -16),
+            
+            // P&L
+            self.pnlLabel.trailingAnchor.constraint(equalTo: ltpLabel.trailingAnchor),
+            self.pnlLabel.centerYAnchor.constraint(equalTo: netQtyLabel.centerYAnchor),
+            
+            // Separator
+            self.separatorView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
+            self.separatorView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
+            self.separatorView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor),
+            self.separatorView.heightAnchor.constraint(equalToConstant: 1)
         ])
     }
 
-    func configure(with holding: Holding) {
-        symbolLabel.text = holding.symbol
-        ltpLabel.text = "LTP: \(holding.safeLTP.asCurrency())"
-        netQtyLabel.text = "NET QTY: \(holding.safeQuantity)"
-        pnlLabel.text = "P&L: \(holding.profitOrLoss.asCurrency())"
-        pnlLabel.textColor = holding.isProfit ? .systemGreen : .systemRed
+    // MARK: - Configuration
 
-//        if let tag = holding.tag {
-//            tagLabel.isHidden = false
-//            tagLabel.text = " \(tag) "
-//        } else {
-//            tagLabel.isHidden = true
-//        }
+    func configure(with holding: Holding) {
+        self.symbolLabel.text = holding.symbol
+        self.ltpLabel.text = "LTP: \(holding.safeLTP.asCurrency())"
+        self.netQtyLabel.text = "NET QTY: \(holding.safeQuantity)"
+        self.pnlLabel.text = "P&L: \(holding.profitOrLoss.asCurrency())"
+        self.pnlLabel.textColor = holding.isProfit ? .systemGreen : .systemRed
     }
 }

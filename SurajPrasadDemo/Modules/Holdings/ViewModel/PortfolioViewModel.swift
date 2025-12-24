@@ -10,48 +10,81 @@ import Combine
 
 final class PortfolioViewModel: PortfolioViewModelProtocol, ObservableObject {
 
-    private var cancellables = Set<AnyCancellable>()
-    
-    internal var holdings: [Holding] = []
-    internal var fetchedholdings = PassthroughSubject<Result<Bool, Error>, Never>()
-    
+    // MARK: - Published State
+
+    @Published private(set) var holdings: [Holding] = []
+    @Published private(set) var portfolioSummary: PortfolioSummary?
+    @Published private(set) var isLoading: Bool = false
+    @Published private(set) var errorMessage: String?
+
+    // MARK: - Publishers (Exposed via Protocol)
+
+    var holdingsPublisher: AnyPublisher<[Holding], Never> {
+        self.$holdings.eraseToAnyPublisher()
+    }
+
+    var portfolioSummaryPublisher: AnyPublisher<PortfolioSummary?, Never> {
+        self.$portfolioSummary.eraseToAnyPublisher()
+    }
+
+    var loadingPublisher: AnyPublisher<Bool, Never> {
+        self.$isLoading.eraseToAnyPublisher()
+    }
+
+    var errorPublisher: AnyPublisher<String?, Never> {
+        self.$errorMessage.eraseToAnyPublisher()
+    }
+
+    // MARK: - Dependencies
+
     private let repository: PortfolioRepository
+    private var cancellables = Set<AnyCancellable>()
 
-    var totalCurrentValue: Double = 0
-    var totalInvestment: Double = 0
-    var overallProfitOrLoss: Double = 0
-    var todaysProfitOrLoss: Double = 0
+    // MARK: - Init
 
-    required init(repository: PortfolioRepository) {
+    init(repository: PortfolioRepository) {
         self.repository = repository
     }
-    
-    private func portfolioSummaryCalculations() {
-        self.totalCurrentValue = holdings.reduce(0) { $0 + $1.currentValue }
-        self.totalInvestment = holdings.reduce(0) { $0 + $1.investedValue }
-        self.overallProfitOrLoss = totalCurrentValue - totalInvestment
-        self.todaysProfitOrLoss = holdings.reduce(0) { $0 + $1.todaysProfitOrLoss }
-    }
-    
-    func getHoldings() {
-        repository.fetchHoldings()
+
+    // MARK: - API Call
+
+    func fetchHoldings() {
+        self.isLoading = true
+        self.errorMessage = nil
+
+        self.repository.fetchHoldings()
+            .receive(on: DispatchQueue.main)
             .sink { [weak self] completion in
-                switch completion {
-                case .failure(let err):
-                    print("Error is \(err.localizedDescription)")
-                    self?.fetchedholdings.send(.failure(err))
-                case .finished:
-                    print("Finished")
-                    self?.fetchedholdings.send(.success(true))
-                }
-            }
-    
-            receiveValue: { [weak self] holdings in
                 guard let self else { return }
-                self.holdings = holdings.data?.userHoldings ?? []
-                self.portfolioSummaryCalculations()
-                //self.fetchedholdings.send(.success(true))
+                self.isLoading = false
+
+                if case let .failure(error) = completion {
+                    self.errorMessage = error.localizedDescription
+                }
+            } receiveValue: { [weak self] response in
+                guard let self else { return }
+
+                let holdings = response.data?.userHoldings ?? []
+                self.holdings = holdings
+                self.portfolioSummary = self.calculateSummary(from: holdings)
             }
-            .store(in: &cancellables)
+            .store(in: &self.cancellables)
+    }
+
+    // MARK: - Summary Calculation
+
+    private func calculateSummary(from holdings: [Holding]) -> PortfolioSummary {
+
+        let totalCurrentValue = holdings.reduce(0) { $0 + $1.currentValue }
+        let totalInvestment = holdings.reduce(0) { $0 + $1.investedValue }
+        let todaysProfitOrLoss = holdings.reduce(0) { $0 + $1.todaysProfitOrLoss }
+        let overallProfitOrLoss = totalCurrentValue - totalInvestment
+
+        return PortfolioSummary(
+            totalCurrentValue: totalCurrentValue,
+            totalInvestment: totalInvestment,
+            overallProfitOrLoss: overallProfitOrLoss,
+            todaysProfitOrLoss: todaysProfitOrLoss
+        )
     }
 }

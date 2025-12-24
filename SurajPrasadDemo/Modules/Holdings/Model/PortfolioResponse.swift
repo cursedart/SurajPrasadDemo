@@ -24,6 +24,7 @@ struct PortfolioResponse: Decodable {
 }
 
 // MARK: - Data Container
+
 struct PortfolioData: Decodable {
 
     let userHoldings: [Holding]?

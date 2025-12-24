@@ -9,28 +9,6 @@ import Foundation
 import UIKit
 import Combine
 
-//struct Holding {
-//    let symbol: String
-//    let ltp: String
-//    let netQty: String
-//    let pnl: String
-//    let isProfit: Bool
-//    let tag: String?
-//}
-
-//private var holdings: [Holding] = [
-//    Holding(symbol: "ASHOKLEY", ltp: "₹ 119.10", netQty: "3", pnl: "₹ 12.90", isProfit: true, tag: nil),
-//    Holding(symbol: "HDFC", ltp: "₹ 2,497.20", netQty: "7", pnl: "-₹1,517.46", isProfit: false, tag: nil),
-//    Holding(symbol: "ICICIBANK", ltp: "₹ 624.70", netQty: "1", pnl: "₹ 135.60", isProfit: true, tag: nil),
-//    Holding(symbol: "IDEA", ltp: "₹ 9.95", netQty: "3", pnl: "₹ 2.79", isProfit: true, tag: "T1 Holding"),
-//    Holding(symbol: "IDEA", ltp: "₹ 9.95", netQty: "3", pnl: "₹ 2.79", isProfit: true, tag: "T1 Holding"),
-//    Holding(symbol: "IDEA", ltp: "₹ 9.95", netQty: "3", pnl: "₹ 2.79", isProfit: true, tag: "T1 Holding"),
-//    Holding(symbol: "IDEA", ltp: "₹ 9.95", netQty: "3", pnl: "₹ 2.79", isProfit: true, tag: "T1 Holding"),
-//    Holding(symbol: "IDEA", ltp: "₹ 9.95", netQty: "3", pnl: "₹ 2.79", isProfit: true, tag: "T1 Holding"),
-//    Holding(symbol: "IDEA", ltp: "₹ 9.95", netQty: "3", pnl: "₹ 2.79", isProfit: true, tag: "T1 Holding"),
-//    Holding(symbol: "IDEA", ltp: "₹ 9.95", netQty: "71", pnl: "₹ 66.03", isProfit: true, tag: nil)
-//]
-
 final class PortfolioViewC: UIViewController {
 
     private let tableView: UITableView = {
@@ -46,6 +24,7 @@ final class PortfolioViewC: UIViewController {
     
     private var viewModel: PortfolioViewModelProtocol
     private var cancellables: Set<AnyCancellable> = []
+    private let summaryView = PortfolioSummaryDropdownView()
 
     // MARK: - View Life Cycle Functions
     
@@ -107,13 +86,11 @@ final class PortfolioViewC: UIViewController {
         self.tableView.contentInset.bottom = 240
         self.tableView.verticalScrollIndicatorInsets.bottom = 240
         
-        self.viewModel.getHoldings()
+        self.viewModel.fetchHoldings()
         self.bindingsSetup()
     }
     
     private func setupBottomView() {
-        let summaryView = PortfolioSummaryDropdownView()
-
         view.addSubview(summaryView)
 
         NSLayoutConstraint.activate([
@@ -146,27 +123,34 @@ final class PortfolioViewC: UIViewController {
     }
 
     private func bindViewModelToView() {
-        ///
-        self.viewModel.fetchedholdings
+        
+        self.viewModel.portfolioSummaryPublisher
+            .compactMap { $0 }
             .receive(on: DispatchQueue.main)
-            .sink { [weak self] result in
+            .sink { [weak self] summary in
                 guard let self else { return }
+                self.updateSummaryView(with: summary)
+            }
+            .store(in: &cancellables)
 
-                switch result {
-                case .success(_):
-                    self.reloadUserInfoOnView()
-
-                case .failure(let appError):
-                    print(appError)
-                }
-            }.store(in: &self.cancellables)
+        self.viewModel.holdingsPublisher
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in
+                guard let self else { return }
+                self.tableView.reloadData()
+            }
+            .store(in: &cancellables)
     }
-
-    private func dataSetup() {
-    }
-
-    private func reloadUserInfoOnView() {
-        self.tableView.reloadData()
+    
+    private func updateSummaryView(with summary: PortfolioSummary) {
+        self.summaryView.updateSummary(
+            currentValue: summary.totalCurrentValue.asCurrency(),
+            totalInvestment: summary.totalInvestment.asCurrency(),
+            todaysPNL: summary.todaysProfitOrLoss.asCurrency(),
+            isTodayProfit: summary.todaysProfitOrLoss >= 0,
+            totalPNL: summary.overallProfitOrLoss.asCurrency(),
+            isTotalProfit: summary.overallProfitOrLoss >= 0
+        )
     }
 }
 

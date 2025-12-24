@@ -37,7 +37,7 @@ class NetworkManager: NetworkService {
                     }
                     return data
                 }
-                .decode(type: T.self, decoder: JSONDecoder()).print() //debug
+                .decode(type: T.self, decoder: JSONDecoder())// .print()
                 .receive(on: DispatchQueue.main)
                 .sink(receiveCompletion: { (completion) in
                     if case let .failure(error) = completion {
