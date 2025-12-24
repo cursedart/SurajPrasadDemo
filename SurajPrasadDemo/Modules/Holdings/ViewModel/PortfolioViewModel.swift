@@ -47,10 +47,16 @@ final class PortfolioViewModel: PortfolioViewModelProtocol, ObservableObject {
     }
 
     // MARK: - API Call
-
-    func fetchHoldings() {
+    
+    private func resetState() {
+        self.holdings = []
+        self.portfolioSummary = nil
         self.isLoading = true
         self.errorMessage = nil
+    }
+
+    func fetchHoldings() {
+        self.resetState()
 
         self.repository.fetchHoldings()
             .receive(on: DispatchQueue.main)

@@ -25,6 +25,7 @@ final class PortfolioViewC: UIViewController {
     private var viewModel: PortfolioViewModelProtocol
     private var cancellables: Set<AnyCancellable> = []
     private let summaryView = PortfolioSummaryDropdownView()
+    private let refreshControl = UIRefreshControl()
 
     // MARK: - View Life Cycle Functions
     
@@ -106,12 +107,20 @@ final class PortfolioViewC: UIViewController {
         self.tableView.dataSource = self
         self.tableView.delegate = self
 
+        // Add Pull to Refresh
+        self.refreshControl.addTarget(self, action: #selector(handleRefresh), for: .valueChanged)
+        self.tableView.refreshControl = refreshControl
+
         NSLayoutConstraint.activate([
             self.tableView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
             self.tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             self.tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             self.tableView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
         ])
+    }
+    
+    @objc private func handleRefresh() {
+        self.viewModel.fetchHoldings()
     }
     
     private func bindingsSetup() {
@@ -128,13 +137,16 @@ final class PortfolioViewC: UIViewController {
                                  self.viewModel.portfolioSummaryPublisher)
         .receive(on: DispatchQueue.main)
         .sink { [weak self] holdings, summary in
-            
             guard let self else { return }
             guard let summary else { return }
 
             self.updateSummaryView(with: summary)
-
             self.tableView.reloadData()
+
+            // Stop refresh animation
+            if self.refreshControl.isRefreshing {
+                self.refreshControl.endRefreshing()
+            }
         }
         .store(in: &self.cancellables)
     }
