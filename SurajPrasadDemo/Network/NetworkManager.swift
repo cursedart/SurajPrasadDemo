@@ -11,8 +11,12 @@ import Combine
 final class NetworkManager: NetworkService {
 
     static let shared = NetworkManager()
-    private init() {}
 
+    init(session: URLSession = .shared) {
+        self.session = session
+    }
+    
+    private let session: URLSession
     private let baseURL = "https://"
 
     func getData<T: Decodable>(endpoint: Endpoint, type: T.Type) -> AnyPublisher<T, Error> {
@@ -25,7 +29,7 @@ final class NetworkManager: NetworkService {
         var request = URLRequest(url: url)
         request.httpMethod = endpoint.method.rawValue
         
-        return URLSession.shared.dataTaskPublisher(for: url)
+        return session.dataTaskPublisher(for: url)
             .tryMap { data, response in
                 guard let httpResponse = response as? HTTPURLResponse,
                       200...299 ~= httpResponse.statusCode else {
