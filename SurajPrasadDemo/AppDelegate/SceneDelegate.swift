@@ -48,35 +48,4 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         // Use this method to save data, release shared resources, and store enough scene-specific state information
         // to restore the scene back to its current state.
     }
-
-
 }
-
-extension SceneDelegate {
-    
-    private func moveToPortfolio(windowScene: UIWindowScene) {
-        let window = UIWindow(windowScene: windowScene)
-        self.window = window
-
-        let networkService = NetworkManager.shared
-
-        let localDataSource = CoreDataHoldingsStore()
-
-        let repository = PortfolioRepositoryImpl(
-            remote: networkService,
-            local: localDataSource
-        )
-
-        let viewModel = PortfolioViewModel(repository: repository)
-
-        let portfolioVC = PortfolioViewC(viewModel: viewModel)
-
-        let navigationController = UINavigationController(
-            rootViewController: portfolioVC!
-        )
-
-        window.rootViewController = navigationController
-        window.makeKeyAndVisible()
-    }
-}
-
