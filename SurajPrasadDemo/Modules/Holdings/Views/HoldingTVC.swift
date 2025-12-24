@@ -16,54 +16,54 @@ final class HoldingTVC: UITableViewCell {
     // MARK: - UI Components
 
     private let symbolLabel: UILabel = {
-        let label = UILabel()
+        @UsesAutoLayout
+        var label = UILabel()
         label.font = .boldSystemFont(ofSize: 16)
         label.textColor = .black
-        label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
 
     private let tagLabel: UILabel = {
-        let label = UILabel()
+        @UsesAutoLayout
+        var label = UILabel()
         label.font = .systemFont(ofSize: 11)
         label.textColor = .darkGray
         label.backgroundColor = UIColor(white: 0.9, alpha: 1)
         label.layer.cornerRadius = 4
         label.clipsToBounds = true
         label.textAlignment = .center
-        label.translatesAutoresizingMaskIntoConstraints = false
         label.isHidden = true
         return label
     }()
 
     private let ltpLabel: UILabel = {
-        let label = UILabel()
+        @UsesAutoLayout
+        var label = UILabel()
         label.font = .systemFont(ofSize: 14)
         label.textAlignment = .right
-        label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
 
     private let netQtyLabel: UILabel = {
-        let label = UILabel()
+        @UsesAutoLayout
+        var label = UILabel()
         label.font = .systemFont(ofSize: 13)
         label.textColor = .gray
-        label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
 
     private let pnlLabel: UILabel = {
-        let label = UILabel()
+        @UsesAutoLayout
+        var label = UILabel()
         label.font = .boldSystemFont(ofSize: 14)
         label.textAlignment = .right
-        label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
 
     private let separatorView: UIView = {
-        let view = UIView()
+        @UsesAutoLayout
+        var view = UIView()
         view.backgroundColor = UIColor(white: 0.9, alpha: 1)
-        view.translatesAutoresizingMaskIntoConstraints = false
         return view
     }()
 

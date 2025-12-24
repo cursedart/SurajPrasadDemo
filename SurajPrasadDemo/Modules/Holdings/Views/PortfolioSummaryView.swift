@@ -25,26 +25,27 @@ final class PortfolioSummaryDropdownView: UIView {
     // MARK: - UI Components
 
     private let contentStack: UIStackView = {
-        let stack = UIStackView()
+        @UsesAutoLayout
+        var stack = UIStackView()
         stack.axis = .vertical
         stack.spacing = 18
         stack.alpha = 0
         stack.isHidden = true
-        stack.translatesAutoresizingMaskIntoConstraints = false
         return stack
     }()
 
     private let toggleRow: UIStackView = {
-        let stack = UIStackView()
+        @UsesAutoLayout
+        var stack = UIStackView()
         stack.axis = .horizontal
         stack.alignment = .center
         stack.spacing = 8
-        stack.translatesAutoresizingMaskIntoConstraints = false
         return stack
     }()
 
     private let toggleTitleLabel: UILabel = {
-        let label = UILabel()
+        @UsesAutoLayout
+        var label = UILabel()
         label.text = "Profit & Loss*"
         label.font = .systemFont(ofSize: 14)
         label.textColor = .darkGray
@@ -59,9 +60,9 @@ final class PortfolioSummaryDropdownView: UIView {
     }()
 
     private let toggleArrow: UIImageView = {
-        let imageView = UIImageView(image: UIImage(systemName: "chevron.down"))
+        @UsesAutoLayout
+        var imageView = UIImageView(image: UIImage(systemName: "chevron.down"))
         imageView.tintColor = .darkGray
-        imageView.translatesAutoresizingMaskIntoConstraints = false
         return imageView
     }()
 
@@ -69,6 +70,7 @@ final class PortfolioSummaryDropdownView: UIView {
 
     override init(frame: CGRect) {
         super.init(frame: frame)
+        
         self.initialSetup()
         self.setupGesture()
     }

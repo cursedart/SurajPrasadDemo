@@ -17,7 +17,7 @@ final class PortfolioViewModel: PortfolioViewModelProtocol, ObservableObject {
     @Published private(set) var isLoading: Bool = false
     @Published private(set) var errorMessage: String?
 
-    // MARK: - Publishers (Exposed via Protocol)
+    // MARK: - Publishers
 
     var holdingsPublisher: AnyPublisher<[Holding], Never> {
         self.$holdings.eraseToAnyPublisher()
@@ -70,8 +70,6 @@ final class PortfolioViewModel: PortfolioViewModelProtocol, ObservableObject {
             }
             .store(in: &self.cancellables)
     }
-
-    // MARK: - Summary Calculation
 
     private func calculateSummary(from holdings: [Holding]) -> PortfolioSummary {
 
