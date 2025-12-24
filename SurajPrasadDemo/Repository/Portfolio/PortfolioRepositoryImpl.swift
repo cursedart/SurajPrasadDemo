@@ -20,10 +20,11 @@ final class PortfolioRepositoryImpl: PortfolioRepository {
 
     func fetchHoldings() -> AnyPublisher<PortfolioResponse, Error> {
 
-        remote.getData(endpoint: .portfolio, type: PortfolioResponse.self)
+        self.remote.getData(endpoint: .portfolio, type: PortfolioResponse.self)
             .handleEvents(receiveOutput: { [weak self] response in
+                guard let self else { return }
                 let holdings = response.data?.userHoldings ?? []
-                self?.local.saveHoldings(holdings)
+                self.local.saveHoldings(holdings)
             })
             .catch { [weak self] _ -> AnyPublisher<PortfolioResponse, Error> in
                 guard let self else {

@@ -10,14 +10,14 @@ import Combine
 
 final class PortfolioViewModel: PortfolioViewModelProtocol, ObservableObject {
 
-    // MARK: - Published State
+    // MARK: - Published Properties
 
     @Published private(set) var holdings: [Holding] = []
     @Published private(set) var portfolioSummary: PortfolioSummary?
     @Published private(set) var isLoading: Bool = false
     @Published private(set) var errorMessage: String?
 
-    // MARK: - Publishers
+    // MARK: - Publishers Properties
 
     var holdingsPublisher: AnyPublisher<[Holding], Never> {
         self.$holdings.eraseToAnyPublisher()

@@ -23,10 +23,6 @@ final class PersistenceStorage {
             }
         }
 
-        // Recommended Core Data settings
-        container.viewContext.mergePolicy = NSMergeByPropertyObjectTrumpMergePolicy
-        container.viewContext.automaticallyMergesChangesFromParent = true
-
         return container
     }()
 
