@@ -91,7 +91,7 @@ final class PortfolioViewC: UIViewController {
     }
     
     private func setupBottomView() {
-        view.addSubview(summaryView)
+        self.view.addSubview(summaryView)
 
         NSLayoutConstraint.activate([
             summaryView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 8),
@@ -101,7 +101,7 @@ final class PortfolioViewC: UIViewController {
     }
 
     private func setupTableView() {
-        view.addSubview(self.tableView)
+        self.view.addSubview(self.tableView)
 
         self.tableView.dataSource = self
         self.tableView.delegate = self
@@ -124,10 +124,8 @@ final class PortfolioViewC: UIViewController {
 
     private func bindViewModelToView() {
 
-        Publishers.CombineLatest(
-            self.viewModel.holdingsPublisher,
-            self.viewModel.portfolioSummaryPublisher
-        )
+        Publishers.CombineLatest(self.viewModel.holdingsPublisher,
+                                 self.viewModel.portfolioSummaryPublisher)
         .receive(on: DispatchQueue.main)
         .sink { [weak self] holdings, summary in
             

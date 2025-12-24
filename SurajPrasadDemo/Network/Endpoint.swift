@@ -8,7 +8,6 @@
 import Foundation
 
 enum Endpoint {
-
     case portfolio
 
     /// API Path

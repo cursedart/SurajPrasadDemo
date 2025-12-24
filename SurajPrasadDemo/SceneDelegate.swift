@@ -17,20 +17,8 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         // If using a storyboard, the `window` property will automatically be initialized and attached to the scene.
         // This delegate does not imply the connecting scene or session are new (see `application:configurationForConnectingSceneSession` instead).
         
-        guard let windowScene = (scene as? UIWindowScene) else { return }
-        
-        let networkService = NetworkManager.shared
-        let repository = PortfolioRepositoryImpl(networkService: networkService)
-        let viewModel = PortfolioViewModel(repository: repository)
-        
-        // Create an instance of your initial view controller
-        let portfolioViewC = PortfolioViewC(viewModel: viewModel)
-        
-        // Create a UIWindow and set the initial view controller as the root view controller
-        let window = UIWindow(windowScene: windowScene)
-        window.rootViewController = UINavigationController(rootViewController: portfolioViewC!)
-        self.window = window
-        window.makeKeyAndVisible()
+        guard let windowScene = scene as? UIWindowScene else { return }
+        self.moveToPortfolio(windowScene: windowScene)
     }
 
     func sceneDidDisconnect(_ scene: UIScene) {
@@ -62,5 +50,33 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     }
 
 
+}
+
+extension SceneDelegate {
+    
+    private func moveToPortfolio(windowScene: UIWindowScene) {
+        let window = UIWindow(windowScene: windowScene)
+        self.window = window
+
+        let networkService = NetworkManager.shared
+
+        let localDataSource = CoreDataHoldingsStore()
+
+        let repository = PortfolioRepositoryImpl(
+            remote: networkService,
+            local: localDataSource
+        )
+
+        let viewModel = PortfolioViewModel(repository: repository)
+
+        let portfolioVC = PortfolioViewC(viewModel: viewModel)
+
+        let navigationController = UINavigationController(
+            rootViewController: portfolioVC!
+        )
+
+        window.rootViewController = navigationController
+        window.makeKeyAndVisible()
+    }
 }
 
