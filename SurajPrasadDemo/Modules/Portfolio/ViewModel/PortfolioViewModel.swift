@@ -85,12 +85,14 @@ final class PortfolioViewModel: PortfolioViewModelProtocol, ObservableObject {
         let totalInvestment = holdings.reduce(0) { $0 + $1.investedValue }
         let todaysProfitOrLoss = holdings.reduce(0) { $0 + $1.todaysProfitOrLoss }
         let overallProfitOrLoss = totalCurrentValue - totalInvestment
+        let profitOrLossPercentage: Double = totalInvestment == 0 ? 0 : (overallProfitOrLoss / totalInvestment) * 100
 
         return PortfolioSummary(
             totalCurrentValue: totalCurrentValue,
             totalInvestment: totalInvestment,
             overallProfitOrLoss: overallProfitOrLoss,
-            todaysProfitOrLoss: todaysProfitOrLoss
+            todaysProfitOrLoss: todaysProfitOrLoss,
+            profitOrLossPercentage: profitOrLossPercentage
         )
     }
 }

@@ -12,7 +12,7 @@ import Combine
 final class PortfolioViewC: UIViewController {
     
     // MARK: UI Components
-
+    
     private let tableView: UITableView = {
         @UsesAutoLayout
         var tv = UITableView(frame: .zero, style: .plain)
@@ -35,11 +35,11 @@ final class PortfolioViewC: UIViewController {
     private var cancellables: Set<AnyCancellable> = []
     private let summaryView = PortfolioSummaryDropdownView()
     private let refreshControl = UIRefreshControl()
-
+    
     private let collapsedInset: CGFloat = 80
     private let expandedInset: CGFloat = 210
     private var isSummaryExpanded: Bool = false
-
+    
     // MARK: - View Life Cycle Functions
     
     override func viewDidLoad() {
@@ -51,23 +51,23 @@ final class PortfolioViewC: UIViewController {
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
     }
-
+    
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
     }
-
+    
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
     }
-
+    
     override func viewDidDisappear(_ animated: Bool) {
         super.viewDidDisappear(animated)
     }
-
+    
     override func viewWillLayoutSubviews() {
         super.viewWillLayoutSubviews()
     }
-
+    
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
     }
@@ -76,32 +76,32 @@ final class PortfolioViewC: UIViewController {
     }
     
     // MARK: - Init Function
-
+    
     init?(viewModel: PortfolioViewModelProtocol) {
         self.viewModel = viewModel
         super.init(nibName: nil, bundle: nil)
     }
-
+    
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
     
     // MARK: - Notifications Methods
-
+    
     // MARK: - Private Methods
     
     private func initialSetup() {
         self.view.backgroundColor = .white
         self.title = "Portfolio"
-
+        
         self.setupTableView()
         self.setupBottomView()
         self.setupPortfolioState()
         
         self.summaryView.isHidden = true
-
+        
         self.updateTableInsets(isExpanded: false)
-
+        
         self.viewModel.fetchHoldings(isRefreshing: false)
         self.bindingsSetup()
     }
@@ -110,7 +110,7 @@ final class PortfolioViewC: UIViewController {
         self.view.addSubview(self.summaryView)
         
         self.summaryView.delegate = self
-
+        
         NSLayoutConstraint.activate([
             self.summaryView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 8),
             self.summaryView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -8),
@@ -120,7 +120,7 @@ final class PortfolioViewC: UIViewController {
     
     private func setupPortfolioState() {
         view.addSubview(self.stateView)
-
+        
         NSLayoutConstraint.activate([
             self.stateView.topAnchor.constraint(equalTo: view.topAnchor),
             self.stateView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
@@ -133,7 +133,7 @@ final class PortfolioViewC: UIViewController {
         self.tableView.isHidden = true
         self.stateView.update(state: .loading)
     }
-
+    
     private func hideLoadingState() {
         self.stateView.update(state: .hidden)
         self.tableView.isHidden = false
@@ -148,17 +148,17 @@ final class PortfolioViewC: UIViewController {
             self.viewModel.fetchHoldings(isRefreshing: false)
         })
     }
-
+    
     private func setupTableView() {
         self.view.addSubview(self.tableView)
-
+        
         self.tableView.dataSource = self
         self.tableView.delegate = self
-
+        
         // Add Pull to Refresh
         self.refreshControl.addTarget(self, action: #selector(handleRefresh), for: .valueChanged)
         self.tableView.refreshControl = refreshControl
-
+        
         NSLayoutConstraint.activate([
             self.tableView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
             self.tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
@@ -175,17 +175,17 @@ final class PortfolioViewC: UIViewController {
         self.bindViewToViewModel()
         self.bindViewModelToView()
     }
-
+    
     private func bindViewToViewModel() {
     }
-
+    
     private func bindViewModelToView() {
-
+        
         self.viewModel.loadingPublisher
             .receive(on: DispatchQueue.main)
             .sink { [weak self] isLoading in
                 guard let self else { return }
-
+                
                 if isLoading {
                     self.summaryView.isHidden = true
                     self.showLoadingState()
@@ -199,18 +199,18 @@ final class PortfolioViewC: UIViewController {
                 }
             }
             .store(in: &self.cancellables)
-
+        
         Publishers.CombineLatest(self.viewModel.holdingsPublisher,
                                  self.viewModel.portfolioSummaryPublisher)
         .receive(on: DispatchQueue.main)
         .sink { [weak self] holdings, summary in
             guard let self else { return }
             guard let summary else { return }
-
+            
             self.updateSummaryView(with: summary)
             self.summaryView.isHidden = self.viewModel.holdings.isEmpty
             self.tableView.reloadData()
-
+            
             // Stop refresh animation
             if self.refreshControl.isRefreshing {
                 self.refreshControl.endRefreshing()
@@ -220,31 +220,34 @@ final class PortfolioViewC: UIViewController {
     }
     
     private func updateSummaryView(with summary: PortfolioSummary) {
-        self.summaryView.updateSummary(
-            currentValue: summary.totalCurrentValue.asCurrency(),
-            totalInvestment: summary.totalInvestment.asCurrency(),
-            todaysPNL: summary.todaysProfitOrLoss.asCurrency(),
+        let viewData = PortfolioSummaryViewData(
+            currentValueText: summary.totalCurrentValue.asCurrency(),
+            totalInvestmentText: summary.totalInvestment.asCurrency(),
+            todaysPNLText: summary.todaysProfitOrLoss.asCurrency(),
             isTodayProfit: summary.todaysProfitOrLoss >= 0,
-            totalPNL: summary.overallProfitOrLoss.asCurrency(),
-            isTotalProfit: summary.overallProfitOrLoss >= 0
+            totalPNLText: summary.overallProfitOrLoss.asCurrency(),
+            isTotalProfit: summary.overallProfitOrLoss >= 0,
+            profitOrLossPercentage: summary.profitOrLossPercentage
         )
+        
+        self.summaryView.updateSummary(with: viewData)
     }
     
     private func updateTableInsets(isExpanded: Bool, animated: Bool = true) {
         let bottomInset = isExpanded ? expandedInset : collapsedInset
-
+        
         let updates = {
             self.tableView.contentInset.bottom = bottomInset
             self.tableView.verticalScrollIndicatorInsets.bottom = bottomInset
         }
-
+        
         if animated {
             UIView.animate(withDuration: 0.25, animations: updates)
         } else {
             updates()
         }
     }
-
+    
     func setSummaryExpanded(_ expanded: Bool) {
         guard expanded != isSummaryExpanded else { return }
         isSummaryExpanded = expanded

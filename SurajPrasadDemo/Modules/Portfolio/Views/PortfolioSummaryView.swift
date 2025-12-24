@@ -177,15 +177,16 @@ final class PortfolioSummaryDropdownView: UIView {
     
     // MARK: Internal Method
     
-    func updateSummary(currentValue: String, totalInvestment: String, todaysPNL: String, isTodayProfit: Bool, totalPNL: String, isTotalProfit: Bool) {
-        self.currentValueLabel.text = currentValue
-        self.totalInvestmentLabel.text = totalInvestment
+    func updateSummary(with data: PortfolioSummaryViewData) {
+        self.currentValueLabel.text = data.currentValueText
+        self.totalInvestmentLabel.text = data.totalInvestmentText
 
-        self.todaysPNLLabel.text = todaysPNL
-        self.todaysPNLLabel.textColor = isTodayProfit ? .systemGreen : .systemRed
+        self.todaysPNLLabel.text = data.todaysPNLText
+        self.todaysPNLLabel.textColor = data.isTodayProfit ? .systemGreen : .systemRed
 
-        self.toggleValueLabel.text = totalPNL
-        self.toggleValueLabel.textColor = isTotalProfit ? .systemGreen : .systemRed
+        let formattedPercentage = String(format: "%.2f%%", data.profitOrLossPercentage)
+        self.toggleValueLabel.text = "\(data.totalPNLText) (\(formattedPercentage))"
+        self.toggleValueLabel.textColor = data.isTotalProfit ? .systemGreen : .systemRed
     }
 
     // MARK: - Expand / Collapse
