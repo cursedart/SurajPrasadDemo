@@ -10,6 +10,8 @@ import UIKit
 import Combine
 
 final class PortfolioViewC: UIViewController {
+    
+    // MARK: UI Components
 
     private let tableView: UITableView = {
         @UsesAutoLayout
@@ -77,9 +79,9 @@ final class PortfolioViewC: UIViewController {
         fatalError("init(coder:) has not been implemented")
     }
     
-    // MARK: - Notifications Functions
+    // MARK: - Notifications Methods
 
-    // MARK: - Private Functions
+    // MARK: - Private Methods
     
     private func initialSetup() {
         self.view.backgroundColor = .white

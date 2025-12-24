@@ -27,7 +27,7 @@ struct PortfolioResponse: Decodable {
     }
 }
 
-// MARK: - Data Container
+// MARK: - Portfolio Data
 
 struct PortfolioData: Decodable {
 
@@ -47,7 +47,7 @@ struct PortfolioData: Decodable {
     }
 }
 
-// MARK: - Computed Properties (Nil Safe)
+// MARK: - Computed Properties
 
 extension Holding {
     

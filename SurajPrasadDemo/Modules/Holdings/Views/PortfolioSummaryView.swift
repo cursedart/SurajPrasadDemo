@@ -14,7 +14,8 @@ protocol PortfolioSummaryExpandableDelegate: AnyObject {
 
 final class PortfolioSummaryDropdownView: UIView {
 
-    // MARK: - State
+    // MARK: - Properties
+    
     private var isExpanded = false
 
     private let collapsedHeight: CGFloat = 56
