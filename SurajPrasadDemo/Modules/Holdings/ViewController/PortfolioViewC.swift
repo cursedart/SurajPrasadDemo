@@ -123,23 +123,22 @@ final class PortfolioViewC: UIViewController {
     }
 
     private func bindViewModelToView() {
-        
-        self.viewModel.portfolioSummaryPublisher
-            .compactMap { $0 }
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] summary in
-                guard let self else { return }
-                self.updateSummaryView(with: summary)
-            }
-            .store(in: &cancellables)
 
-        self.viewModel.holdingsPublisher
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] _ in
-                guard let self else { return }
-                self.tableView.reloadData()
-            }
-            .store(in: &cancellables)
+        Publishers.CombineLatest(
+            self.viewModel.holdingsPublisher,
+            self.viewModel.portfolioSummaryPublisher
+        )
+        .receive(on: DispatchQueue.main)
+        .sink { [weak self] holdings, summary in
+            
+            guard let self else { return }
+            guard let summary else { return }
+
+            self.updateSummaryView(with: summary)
+
+            self.tableView.reloadData()
+        }
+        .store(in: &self.cancellables)
     }
     
     private func updateSummaryView(with summary: PortfolioSummary) {

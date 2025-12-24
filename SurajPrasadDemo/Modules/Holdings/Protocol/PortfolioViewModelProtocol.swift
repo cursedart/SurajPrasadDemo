@@ -26,5 +26,6 @@ protocol PortfolioViewModelProtocol: AnyObject {
     var errorPublisher: AnyPublisher<String?, Never> { get }
 
     // MARK: - Actions
+    
     func fetchHoldings()
 }
