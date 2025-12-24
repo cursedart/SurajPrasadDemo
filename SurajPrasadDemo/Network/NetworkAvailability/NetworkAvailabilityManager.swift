@@ -2,7 +2,7 @@
 //  NetworkMontior.swift
 //  SurajPrasadDemo
 //
-//  Created by Mobcoder Technologies Private Limited on 24/12/25.
+//  Created by Suraj Prasad on 24/12/25.
 //
 
 import Foundation
@@ -15,25 +15,31 @@ final class NetworkAvailabilityManager: NetworkAvailabilityProviding {
     private let monitor = NWPathMonitor()
     private let queue = DispatchQueue(label: "NetworkAvailabilityMonitor")
 
-    private(set) var isConnected: Bool = true
+    private(set) var isConnected: Bool = false
 
     var onStatusChange: ((Bool) -> Void)?
 
     private init() {}
 
     func startMonitoring() {
-        monitor.pathUpdateHandler = { [weak self] path in
+        self.monitor.pathUpdateHandler = { [weak self] path in
+            guard let self else { return }
+
             let connected = path.status == .satisfied
-            self?.isConnected = connected
+
+            guard self.isConnected != connected else { return }
+
+            self.isConnected = connected
 
             DispatchQueue.main.async {
-                self?.onStatusChange?(connected)
+                self.onStatusChange?(connected)
             }
         }
-        monitor.start(queue: queue)
+
+        self.monitor.start(queue: queue)
     }
 
     func stopMonitoring() {
-        monitor.cancel()
+        self.monitor.cancel()
     }
 }

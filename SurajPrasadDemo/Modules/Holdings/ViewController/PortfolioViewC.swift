@@ -22,6 +22,13 @@ final class PortfolioViewC: UIViewController {
         return tv
     }()
     
+    private var stateView: PortfolioStateView = {
+        @UsesAutoLayout
+        var view = PortfolioStateView()
+        view.isHidden = true
+        return view
+    }()
+    
     // MARK: - Properties
     
     private var viewModel: PortfolioViewModelProtocol
@@ -89,6 +96,8 @@ final class PortfolioViewC: UIViewController {
 
         self.setupTableView()
         self.setupBottomView()
+        self.setupPortfolioState()
+        
         self.summaryView.isHidden = true
 
         self.updateTableInsets(isExpanded: false)
@@ -107,6 +116,37 @@ final class PortfolioViewC: UIViewController {
             self.summaryView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -8),
             self.summaryView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -8)
         ])
+    }
+    
+    private func setupPortfolioState() {
+        view.addSubview(self.stateView)
+
+        NSLayoutConstraint.activate([
+            self.stateView.topAnchor.constraint(equalTo: view.topAnchor),
+            self.stateView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+            self.stateView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            self.stateView.trailingAnchor.constraint(equalTo: view.trailingAnchor)
+        ])
+    }
+    
+    private func showLoadingState() {
+        self.tableView.isHidden = true
+        self.stateView.update(state: .loading)
+    }
+
+    private func hideLoadingState() {
+        self.stateView.update(state: .hidden)
+        self.tableView.isHidden = false
+    }
+    
+    private func showOfflineState() {
+        self.tableView.isHidden = true
+        self.stateView.update(state: .offline { [weak self] in
+            guard let self else { return }
+            
+            self.hideLoadingState()
+            self.viewModel.fetchHoldings(isRefreshing: false)
+        })
     }
 
     private func setupTableView() {
@@ -135,16 +175,6 @@ final class PortfolioViewC: UIViewController {
         self.bindViewToViewModel()
         self.bindViewModelToView()
     }
-    
-    private func showLoadingState() {
-        var config = UIContentUnavailableConfiguration.loading()
-        config.text = "Loading Portfolio..."
-        self.contentUnavailableConfiguration = config
-    }
-
-    private func hideLoadingState() {
-        self.contentUnavailableConfiguration = nil
-    }
 
     private func bindViewToViewModel() {
     }
@@ -160,8 +190,12 @@ final class PortfolioViewC: UIViewController {
                     self.summaryView.isHidden = true
                     self.showLoadingState()
                 } else {
-                    self.summaryView.isHidden = false
+                    self.summaryView.isHidden = self.viewModel.holdings.isEmpty
                     self.hideLoadingState()
+                    
+                    if self.viewModel.holdings.isEmpty {
+                        self.showOfflineState()
+                    }
                 }
             }
             .store(in: &self.cancellables)
@@ -174,7 +208,7 @@ final class PortfolioViewC: UIViewController {
             guard let summary else { return }
 
             self.updateSummaryView(with: summary)
-            self.summaryView.isHidden = false
+            self.summaryView.isHidden = self.viewModel.holdings.isEmpty
             self.tableView.reloadData()
 
             // Stop refresh animation

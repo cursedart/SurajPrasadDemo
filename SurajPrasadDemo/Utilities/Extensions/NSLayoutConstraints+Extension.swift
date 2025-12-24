@@ -37,25 +37,7 @@ extension UIView {
         }
         return bottomAnchor
       }
-
-    /// Returns a collection of constraints to anchor the bounds of the current view to the given view.
-    ///
-    /// - Parameter view: The view to anchor to.
-    /// - Returns: The layout constraints needed for this constraint.
-    func constraintsForAnchoringTo(boundsOf view: UIView) -> [NSLayoutConstraint] {
-        return [
-            topAnchor.constraint(equalTo: view.topAnchor),
-            leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            view.bottomAnchor.constraint(equalTo: bottomAnchor),
-            view.trailingAnchor.constraint(equalTo: trailingAnchor)
-        ]
-    }
 }
-
-/*
- Handling priorities
-Once you have to set priorities to your constraints to prevent breaking constraints you might be happy with the following extension:
- */
 
 extension NSLayoutConstraint {
     
@@ -83,13 +65,7 @@ extension UILayoutPriority {
     }
 }
 
-/*
- An Auto Layout Property Wrapper
- Prevent yourself from constantly writing:
-
- translatesAutoresizingMaskIntoConstraints = false
- By making use of the following Property Wrapper:
- */
+// MARK: UsesAutoLayout
 
 @propertyWrapper
 public struct UsesAutoLayout<T: UIView> {
